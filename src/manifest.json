@@ -1,7 +1,7 @@
 {
   "name": "Audio Only bilibili",
   "version": "1.0.0",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "description": "Enables you to disable video streams on bilibili and listen audio",
   "offline_enabled": true,
   "icons": {
