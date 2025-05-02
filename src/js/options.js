@@ -1,4 +1,4 @@
-const showThumbnail: any = document.getElementById('show-thumbnail');
+const showThumbnail = document.getElementById('show-thumbnail');
 
 // Saves options to chrome.storage
 function saveOptions() {

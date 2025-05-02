@@ -8,17 +8,17 @@
     "128": "img/icon128.png"
   },
   "background": {
-    "scripts": ["js/background.js"]
+    "service_worker": "js/background.js"
   },
   "permissions": [
-  "tabs",
-  "webRequest",
-  "webRequestBlocking",
-  "storage",
-  "*://www.bilibili.com/*",
-  "*://*.bilivideo.com/*"
+    "tabs",
+    "storage"
   ],
-  "browser_action": {
+  "host_permissions": [
+    "*://www.bilibili.com/*",
+    "*://*.bilivideo.com/*"
+  ],
+  "action": {
     "default_title": "Audio Only bilibili"
   },
   "content_scripts": [

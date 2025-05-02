@@ -1,26 +1,7 @@
-// 定义类型
-interface VideoElement extends HTMLVideoElement {
-  style: CSSStyleDeclaration;
-}
-
-interface StorageData {
-  showThumbnail: boolean;
-}
-
-interface MessageData {
-  url: string;
-  type?: string;
-}
-
-interface StyleData {
-  background: string;
-  backgroundSize: string;
-}
-
 // 主代码
-let originalStyle: StyleData | null = null;
+let originalStyle = null;
 
-async function setThumbnailBackground(video: VideoElement): Promise<void> {
+async function setThumbnailBackground(video) {
   if (!originalStyle) {
     originalStyle = {
       background: video.style.background,
@@ -28,7 +9,7 @@ async function setThumbnailBackground(video: VideoElement): Promise<void> {
     };
   }
 
-  const getMetaContent = (property: string, value: string): string => {
+  const getMetaContent = (property, value) => {
     const metaElements = document.getElementsByTagName("meta");
     for (let i = 0; i < metaElements.length; i++) {
       if (metaElements[i].getAttribute(property) === value) {
@@ -43,7 +24,7 @@ async function setThumbnailBackground(video: VideoElement): Promise<void> {
   video.style.opacity = "0.3";
 }
 
-function restoreOriginalStyle(video: VideoElement): void {
+function restoreOriginalStyle(video) {
   if (originalStyle) {
     video.style.background = originalStyle.background;
   }
@@ -54,8 +35,8 @@ function restoreOriginalStyle(video: VideoElement): void {
   }
 }
 
-function setupAudioOnlyMode(video: VideoElement): void {
-  chrome.storage.sync.get({ showThumbnail: true }, (data: StorageData) => {
+function setupAudioOnlyMode(video) {
+  chrome.storage.sync.get({ showThumbnail: true }, (data) => {
     if (data.showThumbnail) {
       setThumbnailBackground(video);
     }
@@ -91,8 +72,8 @@ function setupAudioOnlyMode(video: VideoElement): void {
   }
 }
 
-function handleVideoElement(url: string): void {
-  const video = window.document.getElementsByTagName("video")[0] as VideoElement;
+function handleVideoElement(url) {
+  const video = document.querySelector('.bilibili-player-video video');
   
   if (video === undefined) {
     console.log("Audio Only bilibili - Video element undefined in this frame!");
@@ -105,15 +86,13 @@ function handleVideoElement(url: string): void {
     return;
   }
 
-  video.onloadeddata = function() {
-    if (url !== "" && video.src !== url) {
-      video.pause();
-      video.src = url;
-      video.currentTime = 0;
-      video.play();
-      console.log("完成替换");
-    }
-  };
+  if (url !== "" && video.src !== url) {
+    video.pause();
+    video.src = url;
+    video.currentTime = 0;
+    video.play().catch(e => console.log("播放失败:", e));
+    console.log("完成替换");
+  }
 
   if (url) {
     setupAudioOnlyMode(video);
@@ -122,6 +101,6 @@ function handleVideoElement(url: string): void {
   }
 }
 
-chrome.runtime.onMessage.addListener((message: MessageData) => {
+chrome.runtime.onMessage.addListener((message) => {
   handleVideoElement(message.url);
 });
