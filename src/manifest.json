@@ -13,6 +13,7 @@
   "permissions": [
     "tabs",
     "webRequest",
+    "webRequestBlocking",
     "storage"
   ],
   "host_permissions": [
