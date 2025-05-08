@@ -1,1 +1,113 @@
-!function(e){var t={};function n(o){if(t[o])return t[o].exports;var r=t[o]={i:o,l:!1,exports:{}};return e[o].call(r.exports,r,r.exports,n),r.l=!0,r.exports}n.m=e,n.c=t,n.d=function(e,t,o){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:o})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(e,t){if(1&t&&(e=n(e)),8&t)return e;if(4&t&&"object"==typeof e&&e&&e.__esModule)return e;var o=Object.create(null);if(n.r(o),Object.defineProperty(o,"default",{enumerable:!0,value:e}),2&t&&"string"!=typeof e)for(var r in e)n.d(o,r,function(t){return e[t]}.bind(null,r));return o},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=0)}([function(e,t,n){"use strict";let o=null;async function r(e){o||(o={background:e.style.background,backgroundSize:e.style.backgroundSize});const t=function(e,t){const n=document.getElementsByTagName("meta");for(let o=0;o<n.length;o++)if(n[o].getAttribute(e)===t)return n[o].getAttribute("content");return""}("itemprop","image");e.style.background=`transparent url(${t}) no-repeat center / cover`,e.style.opacity="0.3"}function i(e){!function(e){o&&(e.style.background=o.background)}(e),function(){const e=document.getElementsByClassName("audio_only_div");e.length&&Array.from(e).forEach((function(e){e.remove()}))}()}function u(e){chrome.storage.sync.get({showThumbnail:!0},(function(t){t.showThumbnail&&r(e)})),function(e){const t=document.querySelector(".audio_only_div");t&&t.parentNode&&t.parentNode.removeChild(t);const n=document.createElement("div");n.className="audio_only_div";const o=document.createElement("p");o.className="alert_text",o.innerHTML='音频模式<br><div class="small">点击扩展图标切换模式</div>',n.appendChild(o);const r=e.parentNode;if(!r)return;const i=r.parentNode;i&&(i.appendChild(n),setTimeout(()=>{const e=document.querySelector(".alert_text");e&&e.addEventListener("click",()=>{chrome.runtime.sendMessage({type:"disable-extension"})},!0)},0))}(e)}function c(e){const t=window.document.getElementsByTagName("video")[0];if(void 0===t)return void console.log("Audio Only bilibili - Video element undefined in this frame!");const n=t.getBoundingClientRect();0!==n.width||0!==n.height?(t.onloadeddata=function(e,t){return function(){""!==t&&e.src!==t&&(e.pause(),e.src=t,e.currentTime=0,e.play(),console.log("完成替换"))}}(t,e),e?u(t):i(t)):console.log("Audio Only bilibili - Video element not visible!")}chrome.runtime.onMessage.addListener(e=>{c(e.url)})}]);
+let originalStyle = null;
+
+async function applyThumbnailStyle(element) {
+  if (!originalStyle) {
+    originalStyle = {
+      background: element.style.background,
+      backgroundSize: element.style.backgroundSize
+    };
+  }
+
+  const thumbnailUrl = function getThumbnailUrl(property, value) {
+    const metas = document.getElementsByTagName("meta");
+    for (let i = 0; i < metas.length; i++) {
+      if (metas[i].getAttribute(property) === value) {
+        return metas[i].getAttribute("content");
+      }
+    }
+    return "";
+  }("itemprop", "image");
+
+  element.style.background = `transparent url(${thumbnailUrl}) no-repeat center / cover`;
+  element.style.opacity = "0.3";
+}
+
+function restoreOriginalStyle(element) {
+  function restoreBackground(element) {
+    if (originalStyle) {
+      element.style.background = originalStyle.background;
+    }
+  }
+
+  function removeAudioOnlyDivs() {
+    const audioOnlyDivs = document.getElementsByClassName("audio_only_div");
+    if (audioOnlyDivs.length) {
+      Array.from(audioOnlyDivs).forEach(div => div.remove());
+    }
+  }
+
+  restoreBackground(element);
+  removeAudioOnlyDivs();
+}
+
+function createAudioOnlyUI(element) {
+  chrome.storage.sync.get({ showThumbnail: true }, result => {
+    if (result.showThumbnail) {
+      applyThumbnailStyle(element);
+    }
+  });
+
+  function createAlertDiv(element) {
+    const existingDiv = document.querySelector(".audio_only_div");
+    if (existingDiv && existingDiv.parentNode) {
+      existingDiv.parentNode.removeChild(existingDiv);
+    }
+
+    const div = document.createElement("div");
+    div.className = "audio_only_div";
+
+    const p = document.createElement("p");
+    p.className = "alert_text";
+    p.innerHTML = '音频模式<br><div class="small">点击扩展图标切换模式</div>';
+    div.appendChild(p);
+
+    const parent = element.parentNode;
+    if (!parent) return;
+
+    const grandParent = parent.parentNode;
+    if (grandParent) {
+      grandParent.appendChild(div);
+      setTimeout(() => {
+        const alertText = document.querySelector(".alert_text");
+        if (alertText) {
+          alertText.addEventListener("click", () => {
+            chrome.runtime.sendMessage({ type: "disable-extension" });
+          }, true);
+        }
+      }, 0);
+    }
+  }
+
+  createAlertDiv(element);
+}
+
+function handleVideoElement(url) {
+  const video = window.document.getElementsByTagName("video")[0];
+  if (video === undefined) {
+    console.log("Audio Only bilibili - Video element undefined in this frame!");
+    return;
+  }
+
+  const rect = video.getBoundingClientRect();
+  if (rect.width !== 0 || rect.height !== 0) {
+    video.onloadeddata = function(e, t) {
+      return function() {
+        if (t !== "" && e.src !== t) {
+          e.pause();
+          e.src = t;
+          e.currentTime = 0;
+          e.play();
+          console.log("完成替换");
+        }
+      };
+    }(video, url);
+
+    url ? createAudioOnlyUI(video) : restoreOriginalStyle(video);
+  } else {
+    console.log("Audio Only bilibili - Video element not visible!");
+  }
+}
+
+chrome.runtime.onMessage.addListener(message => {
+  handleVideoElement(message.url);
+}); 

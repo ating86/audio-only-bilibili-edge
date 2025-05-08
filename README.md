@@ -2,7 +2,6 @@
 
 > 基于 [Ashish-Bansal/audio-only-youtube: Listen to only audio on youtube.](https://github.com/Ashish-Bansal/audio-only-youtube)
 
-安装: [Audio Only bilibili - Chrome 网上应用店](https://chrome.google.com/webstore/detail/audio-only-bilibili/ckdhkbociihkjomnnmobadacinmehjfc?hl=zh-CN)
 
 =======================================
 
